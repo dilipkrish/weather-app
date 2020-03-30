@@ -5,7 +5,7 @@ create table weather_station
 			primary key,
 	latitude numeric(8,4),
 	longitude numeric(9,4),
-	elavation numeric(5,1),
+	elevation numeric(5,1),
 	state char(2),
 	name char(30),
 	gsn_flag char(3),

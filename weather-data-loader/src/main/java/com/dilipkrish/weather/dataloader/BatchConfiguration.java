@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.task.configuration.EnableTask;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
@@ -47,10 +48,10 @@ import java.util.Set;
 @Slf4j
 public class BatchConfiguration extends DefaultBatchConfigurer {
 
-    @Value("${stations.file.name:classpath:ghcnd-stations.txt}")
+    @Value("${stations.file.path:classpath:ghcnd-stations.txt}")
     private Resource stationsFile;
 
-    @Value("${stations.file.name:classpath:2017.csv}")
+    @Value("${recordings.file.path:classpath:2017.csv}")
     private Resource recordingsFile;
 
     public static final Set<String> STATIONS_TO_BRING_IN =
@@ -76,12 +77,14 @@ public class BatchConfiguration extends DefaultBatchConfigurer {
 
     @Bean
     public Job weatherStationInitJob(
+
             StepBuilderFactory stepBuilderFactory,
             JobBuilderFactory jobBuilderFactory,
             WeatherStationRepository stationRepository,
             WeatherRecordingRepository recordingRepository,
             DataSource dataSource,
-            EntityManagerFactory entityManagerFactory) {
+            EntityManagerFactory entityManagerFactory,
+            ItemProcessor<WeatherRecording, WeatherRecording> maybeSkip) {
         Step stationStep = stepBuilderFactory.get("Weather Station Setup")
                 .<WeatherStation, WeatherStation>chunk(1000)
                 .reader(stationItemReader())
@@ -95,15 +98,7 @@ public class BatchConfiguration extends DefaultBatchConfigurer {
         Step recordingsStep = stepBuilderFactory.get("2017 Weather Recording Import")
                 .<WeatherRecording, WeatherRecording>chunk(1000)
                 .reader(recordingItemReader())
-                .processor(new ItemProcessor<WeatherRecording, WeatherRecording>() {
-                    @Override
-                    public WeatherRecording process(WeatherRecording item) throws Exception {
-                        if (STATIONS_TO_BRING_IN.contains(item.getId().getStationId())) {
-                            return item;
-                        }
-                        return null;
-                    }
-                })
+                .processor(maybeSkip)
                 .writer(repositoryRecordingWriter(recordingRepository))
                 .transactionManager(platformTransactionManager(dataSource, entityManagerFactory))
                 .listener(chunkListener())
@@ -113,10 +108,28 @@ public class BatchConfiguration extends DefaultBatchConfigurer {
 
         return jobBuilderFactory.get("Weather Data Setup")
                 .incrementer(new RunIdIncrementer())
-//                .start(stationStep)
-                .start(recordingsStep)
+                .start(stationStep)
+                .next(recordingsStep)
                 .build();
+    }
 
+    @Bean
+    @Profile("production")
+    @StepScope
+    ItemProcessor<WeatherRecording, WeatherRecording> passThroughProcessor() {
+        return item -> item;
+    }
+
+    @Bean
+    @Profile("!production")
+    @StepScope
+    ItemProcessor<WeatherRecording, WeatherRecording> skipProcessor() {
+        return item -> {
+            if (STATIONS_TO_BRING_IN.contains(item.getId().getStationId())) {
+                return item;
+            }
+            return null;
+        };
     }
 
     private ChunkListener chunkListener() {

@@ -1,4 +1,4 @@
-package com.dilipkrish.weather.initializemeasurements.ghcn;
+package com.dilipkrish.weather.dataloader.ghcn;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

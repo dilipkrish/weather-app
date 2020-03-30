@@ -1,10 +1,10 @@
-package com.dilipkrish.weather.initializemeasurements;
+package com.dilipkrish.weather.dataloader;
 
-import com.dilipkrish.weather.initializemeasurements.ghcn.Measurement;
-import com.dilipkrish.weather.initializemeasurements.ghcn.WeatherRecording;
-import com.dilipkrish.weather.initializemeasurements.ghcn.WeatherStation;
-import com.dilipkrish.weather.initializemeasurements.services.WeatherRecordingRepository;
-import com.dilipkrish.weather.initializemeasurements.services.WeatherStationRepository;
+import com.dilipkrish.weather.dataloader.ghcn.Measurement;
+import com.dilipkrish.weather.dataloader.ghcn.WeatherRecording;
+import com.dilipkrish.weather.dataloader.ghcn.WeatherStation;
+import com.dilipkrish.weather.dataloader.services.WeatherRecordingRepository;
+import com.dilipkrish.weather.dataloader.services.WeatherStationRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.batch.core.ChunkListener;

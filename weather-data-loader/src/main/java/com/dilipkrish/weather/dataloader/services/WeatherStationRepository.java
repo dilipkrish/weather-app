@@ -1,7 +1,6 @@
-package com.dilipkrish.weather.initializemeasurements.services;
+package com.dilipkrish.weather.dataloader.services;
 
-import com.dilipkrish.weather.initializemeasurements.ghcn.WeatherStation;
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.dilipkrish.weather.dataloader.ghcn.WeatherStation;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;

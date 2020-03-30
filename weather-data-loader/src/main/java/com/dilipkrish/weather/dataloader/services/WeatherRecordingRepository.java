@@ -1,7 +1,7 @@
-package com.dilipkrish.weather.initializemeasurements.services;
+package com.dilipkrish.weather.dataloader.services;
 
 
-import com.dilipkrish.weather.initializemeasurements.ghcn.WeatherRecording;
+import com.dilipkrish.weather.dataloader.ghcn.WeatherRecording;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.UUID;

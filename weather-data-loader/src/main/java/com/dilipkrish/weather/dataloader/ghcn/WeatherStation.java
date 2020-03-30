@@ -1,4 +1,4 @@
-package com.dilipkrish.weather.initializemeasurements.ghcn;
+package com.dilipkrish.weather.dataloader.ghcn;
 
 
 import lombok.Data;
@@ -16,16 +16,16 @@ import java.math.BigDecimal;
 @EqualsAndHashCode
 public class WeatherStation {
     @Id
-    @Column(name= "station_id")
+    @Column(name = "station_id")
     private String stationId;
     private BigDecimal latitude;
     private BigDecimal longitude;
     private BigDecimal elevation;
     private String state;
     private String name;
-    @Column(name= "gsn_flag")
+    @Column(name = "gsn_flag")
     private String gsnFlag;
-    @Column(name= "hcn_crn_flag")
+    @Column(name = "hcn_crn_flag")
     private String hcnCrnFlag;
     @Column(name = "wmo_id")
     private String wmoId;

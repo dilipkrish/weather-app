@@ -18,10 +18,6 @@ if [ -z $SPRING_PROFILES_ACTIVE ]; then
   printf "Ensure you have the ${YELLOW}SPRING_PROFILES_ACTIVE${NC} set to 'production' to import all records\n"
 fi
 
-if [ -z $SPRING_PROFILES_ACTIVE ]; then
-  printf "Ensure you have the ${YELLOW}SPRING_PROFILES_ACTIVE${NC} set to 'production' to import all records\n"
-fi
-
 docker run --rm \
   -p 8080:8080 \
   -e POSTGRES_PASSWORD=$POSTGRES_PASSWORD \

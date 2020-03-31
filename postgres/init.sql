@@ -13,13 +13,13 @@ create table weather_station
 	wmo_id char(5)
 );
 
-create  index weather_station_lat_long_ix
+create index weather_station_lat_long_ix
 	on weather_station (latitude, longitude);
 
-create  index weather_station_state_ix
+create index weather_station_state_ix
 	on weather_station (state);
 
-CREATE INDEX weather_station_location_ix ON weather_station (ST_Distance_Sphere(ST_SetSRID( ST_Point(longitude, latitude), 4326), ST_MakePoint(-97.0970, 33.0146)));
+CREATE INDEX weather_station_location_ix ON weather_station(ST_Distance_Sphere(ST_SetSRID(ST_Point(longitude, latitude), 4326), ST_MakePoint(-97.0970, 33.0146)));
 
 create table weather_recording
 (
@@ -39,5 +39,3 @@ comment on table weather_recording is 'Table that captures the daily measurement
 
 create unique index weather_recording__ix
 	on weather_recording (station_id, element, measurement_date, measurement_time);
-
-

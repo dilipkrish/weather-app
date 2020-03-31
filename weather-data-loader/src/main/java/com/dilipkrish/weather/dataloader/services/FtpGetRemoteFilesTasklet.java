@@ -25,10 +25,10 @@ public class FtpGetRemoteFilesTasklet implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        File localFile = new File(BatchConfiguration.SYSTEM_TEMPORARY_FOLDER + localFileName);
+        File localFile = new File(BatchConfiguration.DOWNLOAD_FOLDER + localFileName);
         if (!localFile.exists()) {
-            File tempFolder = new File(BatchConfiguration.SYSTEM_TEMPORARY_FOLDER);
-            if (!tempFolder.canWrite()) {
+            File tempFolder = new File(BatchConfiguration.DOWNLOAD_FOLDER);
+            if (tempFolder.canWrite()) {
                 URLConnection urlConnection = new URL(ftpUrl).openConnection();
                 InputStream inputStream = urlConnection.getInputStream();
                 Files.copy(inputStream, localFile.toPath());

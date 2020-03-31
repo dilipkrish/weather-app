@@ -27,10 +27,15 @@ public class FtpGetRemoteFilesTasklet implements Tasklet {
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         File localFile = new File(BatchConfiguration.SYSTEM_TEMPORARY_FOLDER + localFileName);
         if (!localFile.exists()) {
-            URLConnection urlConnection = new URL(ftpUrl).openConnection();
-            InputStream inputStream = urlConnection.getInputStream();
-            Files.copy(inputStream, localFile.toPath());
-            inputStream.close();
+            File tempFolder = new File(BatchConfiguration.SYSTEM_TEMPORARY_FOLDER);
+            if (!tempFolder.canWrite()) {
+                URLConnection urlConnection = new URL(ftpUrl).openConnection();
+                InputStream inputStream = urlConnection.getInputStream();
+                Files.copy(inputStream, localFile.toPath());
+                inputStream.close();
+            } else {
+                log.warn("No permissions to write to folder {}, skipping this step", tempFolder.toPath());
+            }
         } else {
             log.warn("File {} already exists, skipping this step", localFile.toPath());
         }

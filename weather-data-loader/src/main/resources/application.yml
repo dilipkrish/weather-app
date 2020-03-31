@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:5432/postgres
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD}
+  jpa:
+    show-sql: false
+  batch:
+    initialize-schema: never

@@ -3,6 +3,8 @@ package com.dilipkrish.weather.dataloader;
 import com.dilipkrish.weather.dataloader.ghcn.Measurement;
 import com.dilipkrish.weather.dataloader.ghcn.WeatherRecording;
 import com.dilipkrish.weather.dataloader.ghcn.WeatherStation;
+import com.dilipkrish.weather.dataloader.services.FtpGetRemoteFilesTasklet;
+import com.dilipkrish.weather.dataloader.services.GZipFileTasklet;
 import com.dilipkrish.weather.dataloader.services.WeatherRecordingRepository;
 import com.dilipkrish.weather.dataloader.services.WeatherStationRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +15,7 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.*;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.scope.context.ChunkContext;
+import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.data.RepositoryItemWriter;
 import org.springframework.batch.item.data.builder.RepositoryItemWriterBuilder;
@@ -25,7 +28,7 @@ import org.springframework.cloud.task.configuration.EnableTask;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.io.Resource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -34,6 +37,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -47,37 +51,37 @@ import java.util.Set;
 @EnableTransactionManagement
 @Slf4j
 public class BatchConfiguration extends DefaultBatchConfigurer {
+    public static final String GHCN_FTP_ROOT = "ftp://ftp.ncdc.noaa.gov/pub/data/ghcn/daily";
 
-    @Value("${stations.file.path:classpath:ghcnd-stations.txt}")
-    private Resource stationsFile;
+    @Value("${stations.file.name:ghcnd-stations.txt}")
+    private String stationsFile;
 
-    @Value("${recordings.file.path:classpath:2017.csv}")
-    private Resource recordingsFile;
+    @Value("${recordings.file.year:2017}")
+    private String recordingsYear;
 
     public static final Set<String> STATIONS_TO_BRING_IN =
             new HashSet<>(Arrays.asList(
-//                    "US1TXCLL053"
-//                    , "US1TXCLL040"
-//                    , "US1TXDN0012"
-//                    , "US1TXDN0028"
-//                    , "US1TXDN0039"
-//                    , "US1TXDN0047"
-//                    , "US1TXDN0048"
-//                    , "USC00413370"
-//                    , "USC00415191"
-//                    , "US1TXDN0008"
-//                    , "US1TXDN0019"
-//                    , "US1TXDN0044"
-//                    , "US1TXDN0053"
-//                    , "US1TXDN0055"
-//                    , "USC00410415"
-//                    , "USC00413476"
-                    "USC00415192"
+                    "US1TXCLL053"
+                    , "US1TXCLL040"
+                    , "US1TXDN0012"
+                    , "US1TXDN0028"
+                    , "US1TXDN0039"
+                    , "US1TXDN0047"
+                    , "US1TXDN0048"
+                    , "USC00413370"
+                    , "USC00415191"
+                    , "US1TXDN0008"
+                    , "US1TXDN0019"
+                    , "US1TXDN0044"
+                    , "US1TXDN0053"
+                    , "US1TXDN0055"
+                    , "USC00410415"
+                    , "USC00413476"
+                    , "USC00415192"
                     , "USR0000TCLD")); // <-- for tmax/tmin
 
     @Bean
     public Job weatherStationInitJob(
-
             StepBuilderFactory stepBuilderFactory,
             JobBuilderFactory jobBuilderFactory,
             WeatherStationRepository stationRepository,
@@ -85,6 +89,29 @@ public class BatchConfiguration extends DefaultBatchConfigurer {
             DataSource dataSource,
             EntityManagerFactory entityManagerFactory,
             ItemProcessor<WeatherRecording, WeatherRecording> maybeSkip) {
+
+        TaskletStep ftpStationFile = stepBuilderFactory.get("getStationFile")
+                .tasklet(new FtpGetRemoteFilesTasklet(
+                        GHCN_FTP_ROOT + "/" + stationsFile,
+                        stationsFile))
+                .build();
+
+        TaskletStep ftpWeatherRecordingFile = stepBuilderFactory.get("Get Weather Recording File For " + recordingsYear)
+                .tasklet(new FtpGetRemoteFilesTasklet(
+                        GHCN_FTP_ROOT + "/by_year/" + recordingsYear + ".csv.gz",
+                        recordingsYear + ".csv.gz"))
+                .build();
+
+        TaskletStep uncompressWeatherRecording = stepBuilderFactory.get("Uncompressing Weather Data")
+                .tasklet(new GZipFileTasklet(
+                        String.format("%s%s",
+                                System.getProperty("java.io.tmpdir"),
+                                recordingsYear + ".csv.gz"),
+                        String.format("%s%s",
+                                System.getProperty("java.io.tmpdir"),
+                                recordingsYear + ".csv")))
+                .build();
+
         Step stationStep = stepBuilderFactory.get("Weather Station Setup")
                 .<WeatherStation, WeatherStation>chunk(1000)
                 .reader(stationItemReader())
@@ -108,7 +135,10 @@ public class BatchConfiguration extends DefaultBatchConfigurer {
 
         return jobBuilderFactory.get("Weather Data Setup")
                 .incrementer(new RunIdIncrementer())
-                .start(stationStep)
+                .start(ftpStationFile)
+                .next(stationStep)
+                .next(ftpWeatherRecordingFile)
+                .next(uncompressWeatherRecording)
                 .next(recordingsStep)
                 .build();
     }
@@ -175,7 +205,8 @@ public class BatchConfiguration extends DefaultBatchConfigurer {
         // * WMO ID       81-85   Character
         return new FlatFileItemReaderBuilder<WeatherStation>()
                 .encoding(StandardCharsets.ISO_8859_1.displayName())
-                .resource(stationsFile)
+                .resource(new FileSystemResource(
+                        System.getProperty("java.io.tmpdir") + File.separator + stationsFile))
                 .name("WeatherStationFileReader")
                 .fixedLength()
                 .columns(new Range[]{
@@ -226,7 +257,7 @@ public class BatchConfiguration extends DefaultBatchConfigurer {
 //        OBS-TIME = 4-character time of observation in hour-minute format (i.e. 0700 =7:00 am)
         return new FlatFileItemReaderBuilder<WeatherRecording>()
                 .encoding(StandardCharsets.ISO_8859_1.displayName())
-                .resource(recordingsFile)
+                .resource(new FileSystemResource(System.getProperty("java.io.tmpdir") + recordingsYear + ".csv"))
                 .name("WeatherRecording")
                 .delimited()
                 .delimiter(",")

@@ -9,7 +9,7 @@ class WeatherSearch extends React.Component {
             <div className="App">
                 <form onSubmit={this.props.onSubmit}>
                     <label>City</label><input name="city"  type="text" onChange={this.props.onCityChanged}/>
-                    <label>State</label><input name="state"  type="text" onChange={this.props.onStateChanged}/>
+                    <label>State</label><input name="state"  type="text" placeholder="Two letter state" onChange={this.props.onStateChanged}/>
                     <input type="submit" value="submit" />
                 </form>
             </div>

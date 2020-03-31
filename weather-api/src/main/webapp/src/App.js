@@ -55,8 +55,8 @@ class App extends React.Component {
         });
     };
 
-    onStationChanged = (station) => {
-        const uri = "http://localhost:8080/api/weather/temperatures/" + station + "";
+    onStationChanged = (e) => {
+        const uri = "http://localhost:8080/api/weather/temperatures/" + e.value + "";
         fetch(uri)
             .then(res => res.json())
             .then((d) => {
@@ -65,7 +65,7 @@ class App extends React.Component {
                         weather: {
                             ...this.state.weather,
                             temperatures: d,
-                            selectedStation: station
+                            selectedStation: e
                         },
                         isLoaded: true
                     });
@@ -75,7 +75,7 @@ class App extends React.Component {
                     this.setState({
                         weather: {
                             ...this.state.weather,
-                            selectedStation: station
+                            selectedStation: e
                         },
                         isLoaded: true,
                         error

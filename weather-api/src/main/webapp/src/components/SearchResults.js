@@ -1,25 +1,23 @@
 import React from 'react';
 import './../App.css';
 import PropTypes from 'prop-types';
-import RadioButton from "./RadioButton";
+import Dropdown from 'react-dropdown';
+import 'react-dropdown/style.css';
 
 class SearchResults extends React.Component {
     render() {
-        const radios = this.props.weatherStations.map((ws) => (
-        <RadioButton
-            key={ws.stationId}
-            id={ws.stationId}
-            onChange={this.props.onStationChanged}
-            value={ws.stationId}
-            isSelected={ws.stationId === this.props.selectedStation}
-            label={ws.name}/>
 
-        ));
-        return (
-            <form>
-                {radios}
-            </form>
-        )
+        if (this.props.weatherStations.length > 0) {
+            return (
+                <Dropdown
+                    options={this.props.weatherStations.map(ws => ({value: ws.stationId, label: ws.name}))}
+                    onChange={this.props.onStationChanged}
+                    value={this.props.selectedStation}
+                    placeholder="Select an weather station"/>
+            )
+        } else {
+            return ('Please enter a valid city, state.');
+        }
     }
 }
 

@@ -54,7 +54,7 @@ class TemperatureGraph extends React.Component {
             animationEnabled: true,
             zoomEnabled: true,
             title: {
-                text: "Try Zooming and Panning"
+                text: "Temperatures"
             },
             data: [{
                 type: "spline",

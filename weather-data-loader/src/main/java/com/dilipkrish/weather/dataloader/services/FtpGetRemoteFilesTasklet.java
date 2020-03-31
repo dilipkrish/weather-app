@@ -1,5 +1,6 @@
 package com.dilipkrish.weather.dataloader.services;
 
+import com.dilipkrish.weather.dataloader.BatchConfiguration;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -24,7 +25,7 @@ public class FtpGetRemoteFilesTasklet implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        File localFile = new File(System.getProperty("java.io.tmpdir") + localFileName);
+        File localFile = new File(BatchConfiguration.SYSTEM_TEMPORARY_FOLDER + localFileName);
         if (!localFile.exists()) {
             URLConnection urlConnection = new URL(ftpUrl).openConnection();
             InputStream inputStream = urlConnection.getInputStream();

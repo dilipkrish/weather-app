@@ -12,8 +12,8 @@ class TemperatureGraph extends React.Component {
 
     generateDataPoints(temperatures) {
         const dps = [];
-        for(let i = 0; i < temperatures; i++) {
-            dps.push({label: temperatures[i].date,y: temperatures[i].high});
+        for(let i = 0; i < temperatures.length; i++) {
+            dps.push({label: temperatures[i].date, y: temperatures[i].high});
         }
         return dps;
     }
@@ -38,9 +38,8 @@ class TemperatureGraph extends React.Component {
         return (
             <div>
                 <CanvasJSChart options={options}
-                    /* onRef={ref => this.chart = ref} */
+                    onRef={ref => this.chart = ref}
                 />
-                {/*You can get reference to the chart instance as shown above using onRef. This allows you to access all chart properties and methods*/}
             </div>
         );
     }

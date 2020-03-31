@@ -40,7 +40,8 @@ public class WeatherRecordingsController {
                                 .orElse(""),
                         entry.getKey(),
                         extractElementValue(entry.getValue(), "TMAX"),
-                        extractElementValue(entry.getValue(),"TMIN")));
+                        extractElementValue(entry.getValue(),"TMIN"),
+                        extractElementValue(entry.getValue(),"TAVG")));
     }
 
     private BigDecimal extractElementValue(List<WeatherRecording> readings, String elementName) {

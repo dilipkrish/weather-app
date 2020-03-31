@@ -20,4 +20,6 @@ public class Temperature {
     private BigDecimal high;
     @NonNull
     private BigDecimal low;
+    @NonNull
+    private BigDecimal average;
 }

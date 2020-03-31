@@ -1,6 +1,6 @@
 download/
 scdf/
-weather/
+./weather/
 postgres/data
 postgres/data.old
 .env

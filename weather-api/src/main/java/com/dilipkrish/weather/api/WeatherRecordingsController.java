@@ -15,9 +15,13 @@ import java.util.*;
 public class WeatherRecordingsController {
 
     private final WeatherRecordingRepository repository;
+    private final TenthsOfCentigradeToFahrenheitConverter fahrenheitConverter;
 
-    public WeatherRecordingsController(WeatherRecordingRepository repository) {
+    public WeatherRecordingsController(
+            WeatherRecordingRepository repository,
+            TenthsOfCentigradeToFahrenheitConverter fahrenheitConverter) {
         this.repository = repository;
+        this.fahrenheitConverter = fahrenheitConverter;
     }
 
     @GetMapping("/temperatures/{stationId}")
@@ -49,6 +53,7 @@ public class WeatherRecordingsController {
                 .filter(r -> Objects.equals(r.getId().getElement(), elementName))
                 .findFirst()
                 .map(WeatherRecording::getMeasuredValue)
+                .map(fahrenheitConverter)
                 .orElse(BigDecimal.ZERO);
     }
 

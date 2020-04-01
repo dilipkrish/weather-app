@@ -4,3 +4,4 @@ scdf/
 postgres/data
 postgres/data.old
 .env
+weather

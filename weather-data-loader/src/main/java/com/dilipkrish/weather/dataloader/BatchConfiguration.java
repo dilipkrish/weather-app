@@ -52,7 +52,7 @@ import java.util.Set;
 @Slf4j
 public class BatchConfiguration extends DefaultBatchConfigurer {
     public static final String GHCN_FTP_ROOT = "ftp://ftp.ncdc.noaa.gov/pub/data/ghcn/daily";
-    public static final String SYSTEM_TEMPORARY_FOLDER = System.getProperty("java.io.tmpdir");
+    public static final String DOWNLOAD_FOLDER = System.getProperty("user.dir") + "/";
 
     @Value("${stations.file.name:ghcnd-stations.txt}")
     private String stationsFile;
@@ -106,10 +106,10 @@ public class BatchConfiguration extends DefaultBatchConfigurer {
         TaskletStep uncompressWeatherRecording = stepBuilderFactory.get("Uncompressing Weather Data")
                 .tasklet(new GZipFileTasklet(
                         String.format("%s%s",
-                                SYSTEM_TEMPORARY_FOLDER,
+                                DOWNLOAD_FOLDER,
                                 recordingsYear + ".csv.gz"),
                         String.format("%s%s",
-                                SYSTEM_TEMPORARY_FOLDER,
+                                DOWNLOAD_FOLDER,
                                 recordingsYear + ".csv")))
                 .build();
 
@@ -207,7 +207,7 @@ public class BatchConfiguration extends DefaultBatchConfigurer {
         return new FlatFileItemReaderBuilder<WeatherStation>()
                 .encoding(StandardCharsets.ISO_8859_1.displayName())
                 .resource(new FileSystemResource(
-                        SYSTEM_TEMPORARY_FOLDER + File.separator + stationsFile))
+                        DOWNLOAD_FOLDER + File.separator + stationsFile))
                 .name("WeatherStationFileReader")
                 .fixedLength()
                 .columns(new Range[]{
@@ -258,7 +258,7 @@ public class BatchConfiguration extends DefaultBatchConfigurer {
 //        OBS-TIME = 4-character time of observation in hour-minute format (i.e. 0700 =7:00 am)
         return new FlatFileItemReaderBuilder<WeatherRecording>()
                 .encoding(StandardCharsets.ISO_8859_1.displayName())
-                .resource(new FileSystemResource(SYSTEM_TEMPORARY_FOLDER + recordingsYear + ".csv"))
+                .resource(new FileSystemResource(DOWNLOAD_FOLDER + recordingsYear + ".csv"))
                 .name("WeatherRecording")
                 .delimited()
                 .delimiter(",")

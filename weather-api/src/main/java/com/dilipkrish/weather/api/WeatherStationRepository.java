@@ -11,7 +11,7 @@ public interface WeatherStationRepository extends CrudRepository<WeatherStation,
     @Query(
             value = "SELECT *" +
                     "FROM public.weather_station ws " +
-                    "WHERE ST_Distance_Sphere(" +
+                    "WHERE ST_DistanceSphere(" +
                     "   ST_SetSRID( ST_Point(ws.longitude, ws.latitude), 4326), " +
                     "   ST_MakePoint(:longitude, :latitude)) <= :distance * 1609.34 " +
                     "AND ws.state = :state",

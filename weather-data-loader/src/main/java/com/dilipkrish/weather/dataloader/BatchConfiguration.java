@@ -82,6 +82,7 @@ public class BatchConfiguration extends DefaultBatchConfigurer {
                     , "USR0000TCLD")); // <-- for tmax/tmin
 
     @Bean
+    @Profile("!skip")
     public Job weatherStationInitJob(
             StepBuilderFactory stepBuilderFactory,
             JobBuilderFactory jobBuilderFactory,

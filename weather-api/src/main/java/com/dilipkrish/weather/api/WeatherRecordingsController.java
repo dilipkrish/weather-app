@@ -45,7 +45,8 @@ public class WeatherRecordingsController {
                         entry.getKey(),
                         extractElementValue(entry.getValue(), "TMAX"),
                         extractElementValue(entry.getValue(),"TMIN"),
-                        extractElementValue(entry.getValue(),"TAVG")));
+                        extractElementValue(entry.getValue(),"TAVG")))
+                .sort(Comparator.comparing(Temperature::getDate));
     }
 
     private BigDecimal extractElementValue(List<WeatherRecording> readings, String elementName) {

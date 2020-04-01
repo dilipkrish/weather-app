@@ -8,7 +8,7 @@ This is an application that showcases the following
 - Setting up of a spring boot application backed by a postgres database
 - [Dockerized postgres](https://github.com/dilipkrish/weather-app/tree/master/postgres) database with the following:
      - Comes with pre-configured schema and index to load weather data
-     - Enables postgis 
+     - Enables postgis. _This is used for radius search. Used to find the weather stations given a lat,long coordinate of a city,state combination._  
 - React based front end
 - Batch application that can be configured to pull in yearly(defaulted to 2017) weather data dump.
 - Dockerized spring applications
@@ -23,7 +23,7 @@ NOTE: This build infrastructure depends on docker being installed.
 ```bash
 docker-compose build
 ```                
-This will build the `weather-app` and the `weather-data-loader-docker` boot applications. Once it has been built, we can now run it using the following commands.
+This will build the `weather-app` and the `weather-data-loader` boot applications. Once it has been built, we can now run it using the following commands.
 
 ```bash
 export MAPQUEST_API_KEY=<your-key>
@@ -35,7 +35,7 @@ docker-compose run postgres #Wait for it to initalize and once the postgres data
 docker-compose up #This will start all the different services
 ```
 
-After the dataloader completes, if you run it without the production profile you'd need to run the following data script in your postgres database
+After the dataloader completes, if you run it with either the production or dev profile you'd need to run the following data script in your postgres database
 
 <script src="https://gist.github.com/dilipkrish/c103d2a452b306fe3a922c54cec5a218.js"></script>
 

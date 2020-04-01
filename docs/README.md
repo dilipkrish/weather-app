@@ -44,6 +44,7 @@ After this when you launch the web application at `http://localhost:8080/` you c
 As the data loader is loading the data, you can now navigate to `http://localhost:8080` to watch play with the app.
 
 #### TODO
+- [ ] Docker compose is a little bit flaky. Because we cannot determine *readiness* it sometimes interferes the database starting up. At this time, stoping the `compose up` and restaring it seems to fix it. Ideally this would be in a swarm/kubernetes cluster which has better support for scheduling.
 - [ ] Add some tests. This mostly uses frameworks and libraries with very little custom code. Add some integration/e2e test
 - [ ] Currently it naively supports all of the data given weather station. 
 Its only been tested with a years worth of data (365 days). Given that the current transport is json
